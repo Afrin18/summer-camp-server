@@ -28,24 +28,43 @@ async function run() {
         await client.connect();
 
 
+        const usersCollection = client.db("summerDB").collection("users");
         const classesCollection = client.db("summerDB").collection("classes");
         const instructorCollection = client.db("summerDB").collection("instructor");
         const selectClsCollection = client.db("summerDB").collection("selectcls");
 
 
-        // class file......
+         // users related api
+        app.get('/users', async (req, res) => {
+            const result = await usersCollection.find().toArray();
+            res.send(result);
+        })
+
+        // users file api......
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+            const query = { email: user.email };
+            const existingUser = await usersCollection.findOne(query);
+            if (existingUser) {
+                return res.send({ message: 'user already exist' })
+            }
+            const result = await usersCollection.insertOne(user);
+            res.send(result);
+        })
+
+        // class file api......
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
             res.send(result);
         })
 
-        // instructor file......
+        // instructor file api......
         app.get('/instructor', async (req, res) => {
             const result = await instructorCollection.find().toArray();
             res.send(result);
         })
        
-        // select class collection
+        // select class collection api....
         app.get('/selectcls', async (req, res) => {
             const email = req.query.email;
             if (!email) {
