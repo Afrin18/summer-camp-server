@@ -44,8 +44,20 @@ async function run() {
             const result = await instructorCollection.find().toArray();
             res.send(result);
         })
-
+       
         // select class collection
+        app.get('/selectcls', async (req, res) => {
+            const email = req.query.email;
+            if (!email) {
+                res.send([]);
+            }
+
+            const query = { email: email };
+            const result = await selectClsCollection.find(query).toArray();
+            res.send(result);
+        })
+
+
         app.post('/selectcls', async (req, res) => {
             const item = req.body;
             const result = await selectClsCollection.insertOne(item);
