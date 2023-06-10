@@ -72,9 +72,20 @@ async function run() {
             next();
         }
 
+        // Warning: use verifyJWT before using verifyInstructor
+        // const verifyInstructors = async (req, res, next) => {
+        //     const email = req.decoded.email;
+        //     const query = { email: email }
+        //     const user = await usersCollection.findOne(query);
+        //     if (user?.role !== 'Instructor') {
+        //         return res.status(403).send({ error: true, message: 'forbidden message' });
+        //     }
+        //     next();
+        // }
+
 
          // users related api
-        app.get('/users', verifyJWT, verifyAdmin, async (req, res) => {
+        app.get('/users', verifyJWT, verifyAdmin,  async (req, res) => {
             const result = await usersCollection.find().toArray();
             res.send(result);
         })
@@ -88,6 +99,13 @@ async function run() {
                 return res.send({ message: 'user already exist' })
             }
             const result = await usersCollection.insertOne(user);
+            res.send(result);
+        })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await usersCollection.deleteOne(query);
             res.send(result);
         })
 
@@ -107,6 +125,20 @@ async function run() {
             res.send(result);
         })
 
+        // check instructor
+        // app.get('/users/instructors/:email', verifyJWT, async (req, res) => {
+        //     const email = req.params.email;
+
+        //     if (req.decoded.email !== email) {
+        //         res.send({ instructor: false })
+        //     }
+
+        //     const query = { email: email }
+        //     const user = await usersCollection.findOne(query);
+        //     const result = { instructor: user?.role === 'instructor' }
+        //     res.send(result);
+        // })
+
         // admin api........
         app.patch('/users/admin/:id', async (req, res) => {
             const id = req.params.id;
@@ -120,6 +152,19 @@ async function run() {
             res.send(result);
         })
 
+        // instructor api........
+        // app.patch('/users/instructors/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const filter = { _id: new ObjectId(id) };
+        //     const updateDoc = {
+        //         $set: {
+        //             role: 'instructor'
+        //         },
+        //     };
+        //     const result = await usersCollection.updateOne(filter, updateDoc);
+        //     res.send(result);
+        // })
+
         // class file api......
         app.get('/classes', async (req, res) => {
             const result = await classesCollection.find().toArray();
@@ -129,6 +174,12 @@ async function run() {
         // instructor file api......
         app.get('/instructor', async (req, res) => {
             const result = await instructorCollection.find().toArray();
+            res.send(result);
+        })
+
+        app.post('/instructor', async (req, res) => {
+            const item = req.body;
+            const result = await instructorCollection.insertOne(item);
             res.send(result);
         })
        
